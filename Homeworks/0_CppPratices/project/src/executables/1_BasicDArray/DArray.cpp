@@ -212,6 +212,9 @@ void DArray::InsertAt(int nIndex, double dValue) {
 
 // overload operator '='
 DArray& DArray::operator = (const DArray& arr) {
+	if (m_pData != nullptr) {
+		delete[] m_pData;
+	}
 	m_nSize = arr.m_nSize;
 	if (m_nSize != 0) {
 		m_pData = new double[m_nSize];
