@@ -64,6 +64,13 @@ double& PolynomialList::coff(int i) {
             }
         }
     }
+    else {
+        Term TTerm(i,0);
+        m_Polynomial.push_back(TTerm);
+        auto& it = m_Polynomial.end();
+        it--;
+        return it->cof;
+    }
 }
 
 void PolynomialList::compress() {
@@ -255,7 +262,12 @@ bool PolynomialList::ReadFromFile(const string& file) {
 }
 
 PolynomialList::Term& PolynomialList::AddOneTerm(const Term& term) {
-    // TODO
-    static Term ERROR; // you should delete this line
-    return ERROR; // you should return a correct value
+    m_Polynomial.push_back(term);
+    this->compress();
+    for (auto& Tit : m_Polynomial) {
+        if (Tit.deg == term.deg) {
+            return Tit;
+        }
+    }
+    return *(new Term(term.deg, 0)); // you should return a correct value
 }
