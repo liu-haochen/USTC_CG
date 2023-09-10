@@ -17,3 +17,8 @@ void Shape::set_end(QPoint e)
 {
 	end = e;
 }
+
+void Shape::AppendLine()
+{
+
+}
