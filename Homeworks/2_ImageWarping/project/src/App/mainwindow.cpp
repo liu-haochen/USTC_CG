@@ -77,6 +77,14 @@ void MainWindow::CreateActions()
 	action_restore_ = new QAction(tr("Restore"), this);
 	action_restore_->setStatusTip(tr("Show origin image"));
 	connect(action_restore_, &QAction::triggered, imagewidget_, &ImageWidget::Restore);
+
+	action_IDW_warp_ = new QAction(tr("IDW_Warp"),this);
+	action_IDW_warp_->setStatusTip(tr("IDW_Warp origin image"));
+	connect(action_IDW_warp_, &QAction::triggered, imagewidget_, &ImageWidget::IDW_warp);
+
+	action_RBF_warp_ = new QAction(tr("RBF_Warp"), this);
+	action_RBF_warp_->setStatusTip(tr("RBF_Warp origin image"));
+	connect(action_RBF_warp_, &QAction::triggered, imagewidget_, &ImageWidget::RBF_warp);
 }
 
 void MainWindow::CreateMenus()
@@ -94,6 +102,8 @@ void MainWindow::CreateMenus()
 	menu_edit_->addAction(action_mirror_);
 	menu_edit_->addAction(action_gray_);
 	menu_edit_->addAction(action_restore_);
+	
+	menu_edit_->addAction(action_RBF_warp_);
 }
 
 void MainWindow::CreateToolBars()
@@ -109,6 +119,8 @@ void MainWindow::CreateToolBars()
 	toolbar_file_->addAction(action_mirror_);
 	toolbar_file_->addAction(action_gray_);
 	toolbar_file_->addAction(action_restore_);
+	toolbar_file_->addAction(action_IDW_warp_);
+	toolbar_file_->addAction(action_RBF_warp_);
 }
 
 void MainWindow::CreateStatusBar()
