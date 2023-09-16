@@ -29,6 +29,10 @@ namespace Image_Processing {
 
 	void Image_Editing::set_bg_image(QImage* bg_image)
 	{
+		if (bg_image == nullptr) {
+
+			return;
+		}
 		m_bg_image = new QImage;
 		*m_bg_image = *bg_image;
 	}

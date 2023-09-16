@@ -4,6 +4,9 @@
 #include <QtWidgets> 
 #include <iostream>
 #include "ChildWindow.h"
+#include "Image_Editing.h"
+#include "Possion_Image_Editing.h"
+#include "Seamless_cloning.h"
 
 using std::cout;
 using std::endl;
@@ -21,6 +24,9 @@ ImageWidget::ImageWidget(ChildWindow* relatewindow)
 	point_end_ = QPoint(0, 0);
 
 	source_window_ = NULL;
+	m_ptr_Editing = nullptr;
+
+	edit_status_ = Edit_status_::Default_;
 }
 
 ImageWidget::~ImageWidget(void)
@@ -45,6 +51,13 @@ void ImageWidget::set_draw_status_to_choose()
 void ImageWidget::set_draw_status_to_paste()
 {
 	draw_status_ = kPaste;
+	edit_status_ = Edit_status_::Possion_Edit_;
+}
+
+void ImageWidget::set_edit_status_to_seamless()
+{
+	draw_status_ = kPaste;
+	edit_status_ = Edit_status_::Seamless_clon_;
 }
 
 QImage* ImageWidget::image()
@@ -87,6 +100,15 @@ void ImageWidget::mousePressEvent(QMouseEvent* mouseevent)
 		switch (draw_status_)
 		{
 		case kChoose:
+			if (m_ptr_Editing == nullptr) {
+				if (edit_status_ == Edit_status_::Possion_Edit_) {
+					m_ptr_Editing = new Image_Processing::Possion_Image_Editing;
+				}
+				else if (edit_status_ == Edit_status_::Seamless_clon_)
+				{
+					m_ptr_Editing = new Image_Processing::Seamless_cloning;
+				}
+			}
 			is_choosing_ = true;
 			point_start_ = point_end_ = mouseevent->pos();
 			break;
@@ -115,14 +137,40 @@ void ImageWidget::mousePressEvent(QMouseEvent* mouseevent)
 				// Restore image
 			//	*(image_) = *(image_backup_);
 
+
+				//editing
+				if (m_ptr_Editing != nullptr) {
+					delete m_ptr_Editing;
+				}
+				if (edit_status_ == Edit_status_::Possion_Edit_) {
+					m_ptr_Editing = new Image_Processing::Possion_Image_Editing;
+				}
+				else if (edit_status_ == Edit_status_::Seamless_clon_)
+				{
+					m_ptr_Editing = new Image_Processing::Seamless_cloning;
+				}
+				QImage copy_image ;
+				QImage copy_bg_image;
+				copy_image = source_window_->imagewidget_->image()->copy(xsourcepos, ysourcepos, w, h);
+				copy_bg_image = image_backup_->copy(xpos, ypos, w, h);
+				m_ptr_Editing->set_image(&copy_image);
+				m_ptr_Editing->set_bg_image(&copy_bg_image);
+				m_ptr_Editing->Edit();
+
+
+				//Paste
+				QPainter painter(image_);
+				painter.drawImage(QPoint(xpos,ypos),* ( m_ptr_Editing->get_Edited_image() ) );
+				painter.end();
+
 				// Paste
-				for (int i = 0; i < w; i++)
+				/*for (int i = 0; i < w; i++)
 				{
 					for (int j = 0; j < h; j++)
 					{
 						image_->setPixel(xpos + i, ypos + j, source_window_->imagewidget_->image()->pixel(xsourcepos + i, ysourcepos + j));
 					}
-				}
+				}*/
 			}
 		}
 
@@ -170,22 +218,34 @@ void ImageWidget::mouseMoveEvent(QMouseEvent* mouseevent)
 			{
 				// Restore image 
 				*(image_) = *(image_backup_);
+				QImage copy_image;
+				QImage copy_bg_image;
+				copy_bg_image = image_->copy(xpos, ypos, w, h);
+				m_ptr_Editing->set_bg_image(&copy_bg_image);
+				m_ptr_Editing->Edit();
 
+
+				//Paste
+				QPainter painter(image_);
+				painter.drawImage(QPoint(xpos, ypos), *(m_ptr_Editing->get_Edited_image()));
+				painter.end();
 				// Paste
-				for (int i = 0; i < w; i++)
+				/*for (int i = 0; i < w; i++)
 				{
 					for (int j = 0; j < h; j++)
 					{
 						image_->setPixel(xpos + i, ypos + j, source_window_->imagewidget_->image()->pixel(xsourcepos + i, ysourcepos + j));
 					}
-				}
+				}*/
 			}
 		}
 
 	default:
 		break;
 	}
-
+	qDebug() << mouseevent->pos();
+	qDebug() << mouseevent->globalPos();
+	
 	update();
 }
 

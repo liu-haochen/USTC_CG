@@ -1,5 +1,6 @@
 #pragma once
 #include <QWidget>
+#include "Image_Editing.h"
 
 class ChildWindow;
 QT_BEGIN_NAMESPACE
@@ -28,7 +29,9 @@ public:
 	void set_draw_status_to_choose();
 	void set_draw_status_to_paste();
 	QImage* image();
-	void set_source_window(ChildWindow* childwindow);
+	void set_source_window(ChildWindow* childwindow);//设置当前选定的窗口
+
+	void set_edit_status_to_seamless();//设定当前是混合possion
 
 protected:
 	void paintEvent(QPaintEvent *paintevent);
@@ -63,5 +66,13 @@ private:
 	DrawStatus					draw_status_;					// Enum type of draw status
 	bool						is_choosing_;
 	bool						is_pasting_;
+	Image_Processing::Image_Editing* m_ptr_Editing;
+
+	enum Edit_status_{
+		Default_,
+		Possion_Edit_,
+		Seamless_clon_,
+	}edit_status_;
+
 };
 

@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget* parent)
 	//ui.setupUi(this);
 
 	mdi_area_ = new QMdiArea;
-	mdi_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	mdi_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);//设置滚动条
 	mdi_area_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	setCentralWidget(mdi_area_);
 
@@ -75,6 +75,10 @@ void MainWindow::CreateActions()
 
 	action_paste_ = new QAction(tr("Paste"), this);
 	connect(action_paste_, SIGNAL(triggered()), this, SLOT(Paste()));
+
+	action_seamless_ = new QAction(tr("Seamless_cloning"), this);
+	connect(action_seamless_, SIGNAL(triggered()), this, SLOT(Paste_seamless()));
+
 }
 
 void MainWindow::CreateMenus()
@@ -114,6 +118,7 @@ void MainWindow::CreateToolBars()
 	toolbar_file_->addSeparator();
 	toolbar_file_->addAction(action_choose_polygon_);
 	toolbar_file_->addAction(action_paste_);
+	toolbar_file_->addAction(action_seamless_);
 }
 
 void MainWindow::CreateStatusBar()
@@ -126,15 +131,15 @@ void MainWindow::Open()
 	QString filename = QFileDialog::getOpenFileName(this);
 	if (!filename.isEmpty())
 	{
-		QMdiSubWindow* existing = FindChild(filename);
+		QMdiSubWindow* existing = FindChild(filename);//QMdiSubWindow用于在QMdiArea中创建子窗口,查找是否打开本文件
 
 		if (existing)
 		{
-			mdi_area_->setActiveSubWindow(existing);
+			mdi_area_->setActiveSubWindow(existing);//如果已经有了,则把其作为活跃窗口
 			return;
 		}
 
-		ChildWindow* child = CreateChildWindow();
+		ChildWindow* child = CreateChildWindow();//否则新建一个子窗口
 		if (child->LoadFile(filename))
 		{
 			statusBar()->showMessage(tr("File loaded"), 2000);
@@ -159,7 +164,7 @@ void MainWindow::Save()
 	SaveAs();
 }
 
-ChildWindow* MainWindow::GetChildWindow() {
+ChildWindow* MainWindow::GetChildWindow() {//获得活跃子窗口
 	QMdiSubWindow* activeSubWindow = mdi_area_->activeSubWindow();
 	if (!activeSubWindow)
 		return nullptr;
@@ -175,7 +180,7 @@ void MainWindow::SaveAs()
 	window->imagewidget_->SaveAs();
 }
 
-ChildWindow* MainWindow::CreateChildWindow()
+ChildWindow* MainWindow::CreateChildWindow()//创建一个子窗口
 {
 	ChildWindow* child = new ChildWindow;
 	mdi_area_->addSubWindow(child);
@@ -183,7 +188,7 @@ ChildWindow* MainWindow::CreateChildWindow()
 	return child;
 }
 
-void MainWindow::SetActiveSubWindow(QWidget* window)
+void MainWindow::SetActiveSubWindow(QWidget* window)//将window设置为活动子窗口
 {
 	if (!window)
 	{
@@ -245,18 +250,29 @@ void MainWindow::Paste()
 	window->imagewidget_->set_source_window(child_source_);
 }
 
-QMdiSubWindow *MainWindow::FindChild(const QString &filename)
+void MainWindow::Paste_seamless()
+{
+	// Paste image rect region to object image
+	ChildWindow* window = GetChildWindow();
+	if (!window)
+		return;
+	window->imagewidget_->set_edit_status_to_seamless();
+	window->imagewidget_->set_source_window(child_source_);
+}
+
+QMdiSubWindow *MainWindow::FindChild(const QString &filename)//查看是否已经打开,如果打开返回已打开,否则返回0
 {
 	QString canonical_filepath = QFileInfo(filename).canonicalFilePath();
-
+	//qDebug() << canonical_filepath;
 	foreach (QMdiSubWindow *window, mdi_area_->subWindowList())
 	{
 		ChildWindow *child = qobject_cast<ChildWindow *>(window->widget());
+		//qDebug() <<"current_file" << child->current_file();
 		if (child->current_file() == canonical_filepath)
 		{
 			return window;
 		}
 	}
-
+	//qDebug() << "return 0";
 	return 0;
 }
