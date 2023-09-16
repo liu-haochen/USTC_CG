@@ -11,7 +11,7 @@ namespace Image_Processing {
 		
 	}
 	double dis(Eigen::MatrixXd a, Eigen::MatrixXd b) {
-		return (a - b).norm();
+		return (a - b).norm()*2;
 	}
 
 

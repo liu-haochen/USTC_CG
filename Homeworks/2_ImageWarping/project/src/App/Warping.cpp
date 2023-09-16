@@ -1,7 +1,7 @@
 #include "Warping.h"
 #include<array>
 
-#define Distant_Coef 2
+#define Distant_Coef 1
 namespace Image_Processing {
 	Warping::Warping() {
 		m_mu = Distant_Coef;
